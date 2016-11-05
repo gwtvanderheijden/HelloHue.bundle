@@ -18,7 +18,7 @@ One room is composed of **one client**, **one or multiple users** and **one or m
 
 * ```Plex.tv login``` is your Plex login.
 * ```Plex.tv passwords``` is your Plex password. It is only sent to plex.tv to get an identification token (so you must have a working internet access).
-* ```Plex Server Address``` is the local adress to reach your server.
+* ```Plex Server Address``` is the local ip adress + port to reach your server (example : 127.0.0.1:32400).
 * ```Philips Hue Bridge Address``` is the ip address of your Philips Bridge.
 * ```Nearest city from your location``` Used to calculate to calculate sunrise/sunset hours at your location.
 * ```Preset 1, color (hex): #``` hexadecimal color value for lights preset 1 (don't write the #).
