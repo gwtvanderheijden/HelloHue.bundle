@@ -70,13 +70,16 @@ def Start():
 def ga_track(eventtype, category, action, label):
 	if Prefs['ANALYTICS'] is not True:
 		return
+	try:
+		event = Event(category=category, action=action, label=label)
+		tracker.track_event(event, session, visitor)
 
-	event = Event(category=category, action=action, label=label)
-	tracker.track_event(event, session, visitor)
-
-	path = u"/" + u"/".join([category, action, label])
-	page = Page(path.lower())
-	tracker.track_pageview(page, session, visitor)
+		path = u"/" + u"/".join([category, action, label])
+		page = Page(path.lower())
+		tracker.track_pageview(page, session, visitor)
+	except:
+		Log("Error while sending analytics")
+		pass
 
 def refresh_analytics():
 	threading.Timer(240.0, refresh_analytics).start()
