@@ -20,6 +20,12 @@
         "default": "127.0.0.1:32400"
     },
     {
+        "id": "HAMBISYNC_IP",
+        "label": "HambiSync IP Address",
+        "type": "text",
+        "default": "127.0.0.1:4567"
+    },
+    {
         "id": "HUE_BRIDGE_IP",
         "label": "Philips Hue Bridge Address",
         "type": "text",
@@ -173,6 +179,12 @@
           "255"
         ],
     "default": "200"
+    },
+    {
+        "id": "ANALYTICS",
+        "label": "Allow HelloHue to collect anonymous data to improve the plugin",
+        "type": "bool",
+        "default": "true"
     },
     {
         "id": "HUE_ROOM_1",
@@ -364,6 +376,18 @@
     "default": "400 ms"
     },
     {
+        "id": "HAM_ON_1",
+        "label": "Start HambiSync on playback start in room 1",
+        "type": "bool",
+        "default": "false"
+    },
+    {
+        "id": "HAM_OFF_1",
+        "label": "Stop HambiSync on playback stop in room 1",
+        "type": "bool",
+        "default": "false"
+    },
+    {
         "id": "HUE_RANDOMIZE_1",
         "label": "Randomize hue and saturation on Dim/Turn On in room 1",
         "type": "bool",
@@ -400,82 +424,6 @@
         "label": "Only trigger lights that are on when the movie starts in room 1",
         "type": "bool",
         "default": "false"
-    },
-    {
-        "id": "PLEX_ON_1",
-        "label": "When the client is turned ON in room 1:",
-        "type": "enum",
-        "values": [
-          "Nothing",
-          "Dim",
-          "Turn Off",
-          "Turn On",
-          "Preset 1",
-          "Preset 2",
-          "Preset 3",
-          "Preset 4",
-          "Preset 5"
-        ],
-    "default": "Nothing"
-    },
-    {
-        "id": "PLEX_TRANSITION_ON_1",
-        "label": "Transition time the client is turned ON in room 1:",
-        "type": "enum",
-        "values": [
-          "0 ms",
-          "400 ms",
-          "1 sec",
-          "2 secs",
-          "3 secs",
-          "5 secs",
-          "10 secs",
-          "15 secs",
-          "30 secs",
-          "45 secs",
-          "1 min",
-          "2 mins",
-          "5 mins"
-        ],
-    "default": "400 ms"
-    },
-    {
-        "id": "PLEX_OFF_1",
-        "label": "When the client is turned OFF in room 1:",
-        "type": "enum",
-        "values": [
-          "Nothing",
-          "Dim",
-          "Turn Off",
-          "Turn On",
-          "Preset 1",
-          "Preset 2",
-          "Preset 3",
-          "Preset 4",
-          "Preset 5"
-        ],
-    "default": "Nothing"
-    },
-    {
-        "id": "PLEX_TRANSITION_OFF_1",
-        "label": "Transition time the client is turned OFF in room 1:",
-        "type": "enum",
-        "values": [
-          "0 ms",
-          "400 ms",
-          "1 sec",
-          "2 secs",
-          "3 secs",
-          "5 secs",
-          "10 secs",
-          "15 secs",
-          "30 secs",
-          "45 secs",
-          "1 min",
-          "2 mins",
-          "5 mins"
-        ],
-    "default": "400 ms"
     },
     {
         "id": "HUE_ROOM_2",
@@ -667,6 +615,18 @@
     "default": "400 ms"
     },
     {
+        "id": "HAM_ON_2",
+        "label": "Start HambiSync on playback start in room 2",
+        "type": "bool",
+        "default": "false"
+    },
+    {
+        "id": "HAM_OFF_2",
+        "label": "Stop HambiSync on playback stop in room 2",
+        "type": "bool",
+        "default": "false"
+    },
+    {
         "id": "HUE_RANDOMIZE_2",
         "label": "Randomize hue and saturation on Dim/Turn On in room 2",
         "type": "bool",
@@ -703,82 +663,6 @@
         "label": "Only trigger lights that are on when the movie starts in room 2",
         "type": "bool",
         "default": "false"
-    },
-    {
-        "id": "PLEX_ON_2",
-        "label": "When the client is turned ON in room 2:",
-        "type": "enum",
-        "values": [
-          "Nothing",
-          "Dim",
-          "Turn Off",
-          "Turn On",
-          "Preset 1",
-          "Preset 2",
-          "Preset 3",
-          "Preset 4",
-          "Preset 5"
-        ],
-    "default": "Nothing"
-    },
-    {
-        "id": "PLEX_TRANSITION_ON_2",
-        "label": "Transition time the client is turned ON in room 2:",
-        "type": "enum",
-        "values": [
-          "0 ms",
-          "400 ms",
-          "1 sec",
-          "2 secs",
-          "3 secs",
-          "5 secs",
-          "10 secs",
-          "15 secs",
-          "30 secs",
-          "45 secs",
-          "1 min",
-          "2 mins",
-          "5 mins"
-        ],
-    "default": "400 ms"
-    },
-    {
-        "id": "PLEX_OFF_2",
-        "label": "When the client is turned OFF in room 2:",
-        "type": "enum",
-        "values": [
-          "Nothing",
-          "Dim",
-          "Turn Off",
-          "Turn On",
-          "Preset 1",
-          "Preset 2",
-          "Preset 3",
-          "Preset 4",
-          "Preset 5"
-        ],
-    "default": "Nothing"
-    },
-    {
-        "id": "PLEX_TRANSITION_OFF_2",
-        "label": "Transition time the client is turned OFF in room 2:",
-        "type": "enum",
-        "values": [
-          "0 ms",
-          "400 ms",
-          "1 sec",
-          "2 secs",
-          "3 secs",
-          "5 secs",
-          "10 secs",
-          "15 secs",
-          "30 secs",
-          "45 secs",
-          "1 min",
-          "2 mins",
-          "5 mins"
-        ],
-    "default": "400 ms"
     },
     {
         "id": "HUE_ROOM_3",
@@ -970,6 +854,18 @@
     "default": "400 ms"
     },
     {
+        "id": "HAM_ON_3",
+        "label": "Start HambiSync on playback start in room 3",
+        "type": "bool",
+        "default": "false"
+    },
+    {
+        "id": "HAM_OFF_3",
+        "label": "Stop HambiSync on playback stop in room 3",
+        "type": "bool",
+        "default": "false"
+    },
+    {
         "id": "HUE_RANDOMIZE_3",
         "label": "Randomize hue and saturation on Dim/Turn On in room 3",
         "type": "bool",
@@ -1006,82 +902,6 @@
         "label": "Only trigger lights that are on when the movie starts in room 3",
         "type": "bool",
         "default": "false"
-    },
-    {
-        "id": "PLEX_ON_3",
-        "label": "When the client is turned ON in room 3:",
-        "type": "enum",
-        "values": [
-          "Nothing",
-          "Dim",
-          "Turn Off",
-          "Turn On",
-          "Preset 1",
-          "Preset 2",
-          "Preset 3",
-          "Preset 4",
-          "Preset 5"
-        ],
-    "default": "Nothing"
-    },
-    {
-        "id": "PLEX_TRANSITION_ON_3",
-        "label": "Transition time the client is turned ON in room 3:",
-        "type": "enum",
-        "values": [
-          "0 ms",
-          "400 ms",
-          "1 sec",
-          "2 secs",
-          "3 secs",
-          "5 secs",
-          "10 secs",
-          "15 secs",
-          "30 secs",
-          "45 secs",
-          "1 min",
-          "2 mins",
-          "5 mins"
-        ],
-    "default": "400 ms"
-    },
-    {
-        "id": "PLEX_OFF_3",
-        "label": "When the client is turned OFF in room 3:",
-        "type": "enum",
-        "values": [
-          "Nothing",
-          "Dim",
-          "Turn Off",
-          "Turn On",
-          "Preset 1",
-          "Preset 2",
-          "Preset 3",
-          "Preset 4",
-          "Preset 5"
-        ],
-    "default": "Nothing"
-    },
-    {
-        "id": "PLEX_TRANSITION_OFF_3",
-        "label": "Transition time the client is turned OFF in room 3:",
-        "type": "enum",
-        "values": [
-          "0 ms",
-          "400 ms",
-          "1 sec",
-          "2 secs",
-          "3 secs",
-          "5 secs",
-          "10 secs",
-          "15 secs",
-          "30 secs",
-          "45 secs",
-          "1 min",
-          "2 mins",
-          "5 mins"
-        ],
-    "default": "400 ms"
     },
     {
         "id": "HUE_ROOM_4",
@@ -1273,6 +1093,18 @@
     "default": "400 ms"
     },
     {
+        "id": "HAM_ON_4",
+        "label": "Start HambiSync on playback start in room 4",
+        "type": "bool",
+        "default": "false"
+    },
+    {
+        "id": "HAM_OFF_4",
+        "label": "Stop HambiSync on playback stop in room 4",
+        "type": "bool",
+        "default": "false"
+    },
+    {
         "id": "HUE_RANDOMIZE_4",
         "label": "Randomize hue and saturation on Dim/Turn On in room 4",
         "type": "bool",
@@ -1309,82 +1141,6 @@
         "label": "Only trigger lights that are on when the movie starts in room 4",
         "type": "bool",
         "default": "false"
-    },
-    {
-        "id": "PLEX_ON_4",
-        "label": "When the client is turned ON in room 4:",
-        "type": "enum",
-        "values": [
-          "Nothing",
-          "Dim",
-          "Turn Off",
-          "Turn On",
-          "Preset 1",
-          "Preset 2",
-          "Preset 3",
-          "Preset 4",
-          "Preset 5"
-        ],
-    "default": "Nothing"
-    },
-    {
-        "id": "PLEX_TRANSITION_ON_4",
-        "label": "Transition time the client is turned ON in room 4:",
-        "type": "enum",
-        "values": [
-          "0 ms",
-          "400 ms",
-          "1 sec",
-          "2 secs",
-          "3 secs",
-          "5 secs",
-          "10 secs",
-          "15 secs",
-          "30 secs",
-          "45 secs",
-          "1 min",
-          "2 mins",
-          "5 mins"
-        ],
-    "default": "400 ms"
-    },
-    {
-        "id": "PLEX_OFF_4",
-        "label": "When the client is turned OFF in room 4:",
-        "type": "enum",
-        "values": [
-          "Nothing",
-          "Dim",
-          "Turn Off",
-          "Turn On",
-          "Preset 1",
-          "Preset 2",
-          "Preset 3",
-          "Preset 4",
-          "Preset 5"
-        ],
-    "default": "Nothing"
-    },
-    {
-        "id": "PLEX_TRANSITION_OFF_4",
-        "label": "Transition time the client is turned OFF in room 4:",
-        "type": "enum",
-        "values": [
-          "0 ms",
-          "400 ms",
-          "1 sec",
-          "2 secs",
-          "3 secs",
-          "5 secs",
-          "10 secs",
-          "15 secs",
-          "30 secs",
-          "45 secs",
-          "1 min",
-          "2 mins",
-          "5 mins"
-        ],
-    "default": "400 ms"
     },
     {
         "id": "HUE_ROOM_5",
@@ -1576,6 +1332,18 @@
     "default": "400 ms"
     },
     {
+        "id": "HAM_ON_5",
+        "label": "Start HambiSync on playback start in room 5",
+        "type": "bool",
+        "default": "false"
+    },
+    {
+        "id": "HAM_OFF_5",
+        "label": "Stop HambiSync on playback stop in room 5",
+        "type": "bool",
+        "default": "false"
+    },
+    {
         "id": "HUE_RANDOMIZE_5",
         "label": "Randomize hue and saturation on Dim/Turn On in room 5",
         "type": "bool",
@@ -1612,82 +1380,5 @@
         "label": "Only trigger lights that are on when the movie starts in room 5",
         "type": "bool",
         "default": "false"
-    },
-    {
-        "id": "PLEX_ON_5",
-        "label": "When the client is turned ON in room 5:",
-        "type": "enum",
-        "values": [
-          "Nothing",
-          "Dim",
-          "Turn Off",
-          "Turn On",
-          "Preset 1",
-          "Preset 2",
-          "Preset 3",
-          "Preset 4",
-          "Preset 5"
-        ],
-    "default": "Nothing"
-    },
-    {
-        "id": "PLEX_TRANSITION_ON_5",
-        "label": "Transition time the client is turned ON in room 5:",
-        "type": "enum",
-        "values": [
-          "0 ms",
-          "400 ms",
-          "1 sec",
-          "2 secs",
-          "3 secs",
-          "5 secs",
-          "10 secs",
-          "15 secs",
-          "30 secs",
-          "45 secs",
-          "1 min",
-          "2 mins",
-          "5 mins"
-        ],
-    "default": "400 ms"
-    },
-    {
-        "id": "PLEX_OFF_5",
-        "label": "When the client is turned OFF in room 5:",
-        "type": "enum",
-        "values": [
-          "Nothing",
-          "Dim",
-          "Turn Off",
-          "Turn On",
-          "Preset 1",
-          "Preset 2",
-          "Preset 3",
-          "Preset 4",
-          "Preset 5"
-        ],
-    "default": "Nothing"
-    },
-    {
-        "id": "PLEX_TRANSITION_OFF_5",
-        "label": "Transition time the client is turned OFF in room 5:",
-        "type": "enum",
-        "values": [
-          "0 ms",
-          "400 ms",
-          "1 sec",
-          "2 secs",
-          "3 secs",
-          "5 secs",
-          "10 secs",
-          "15 secs",
-          "30 secs",
-          "45 secs",
-          "1 min",
-          "2 mins",
-          "5 mins"
-        ],
-    "default": "400 ms"
     }
 ]
-

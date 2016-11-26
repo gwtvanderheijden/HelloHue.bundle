@@ -14,7 +14,11 @@ from astral import Astral
 import pytz
 import xml.etree.ElementTree as ElementTree
 from rgb_cie import Converter
-	
+import struct
+import binascii
+import platform
+from pyga.requests import Event, Page, Tracker, Session, Visitor, Config
+
 ####################################################################################################
 
 PREFIX       = "/applications/HelloHue"
@@ -30,11 +34,68 @@ PROFILE_ICON = 'hellohue.png'
 # Start function
 ####################################################################################################
 def Start():
-	Log('Starting HelloHue .. Hello World!')
+	Log('Starting HelloHue 1.1.8.3 .. Hello World!')
+
+	global tracker, visitor, session
+	anonymousConfig = Config()
+	anonymousConfig.anonimize_ip_address = True
+	tracker = Tracker('UA-87999998-1', 'none', conf=anonymousConfig)
+	visitor = Visitor()
+	visitor.unique_id = struct.unpack("!I", binascii.unhexlify(Dict["anon_id"][32:]))[0]/2
+	visitor.first_visit_time = Dict["first_use"]
+	session = Session()
+	Log(visitor.unique_id)
+
+	if Dict["anon_id"] == "" or not Dict["anon_id"]:
+		Dict["anon_id"] = get_identifier()
+
+	if Dict["first_use"] == "" or not Dict["first_use"]:
+			Dict["first_use"] = datetime.utcnow()
+			ga_track('event', 'Users', 'New', '1')
+
+	Log(Dict["first_use"])
+
+	ga_track('event', 'General', 'Plugin', 'Start')
+	refresh_analytics()
+
 	HTTP.CacheTime = 0
 	ObjectContainer.title1 = NAME
-	ObjectContainer.art = R(ART)	
+	ObjectContainer.art = R(ART)
 	ValidatePrefs()
+
+####################################################################################################
+# Analytics
+####################################################################################################
+
+def ga_track(eventtype, category, action, label):
+	if Prefs['ANALYTICS'] is not True:
+		return
+
+	event = Event(category=category, action=action, label=label)
+	tracker.track_event(event, session, visitor)
+
+	path = u"/" + u"/".join([category, action, label])
+	page = Page(path.lower())
+	tracker.track_pageview(page, session, visitor)
+
+def refresh_analytics():
+	threading.Timer(240.0, refresh_analytics).start()
+	if Prefs['ANALYTICS'] is True:
+		ga_track('event', 'General', 'Analytics', 'Refresh')
+		Log("refresh_analytics done")
+
+def get_identifier():
+	identifier = None
+	try:
+		identifier = Platform.MachineIdentifier
+		Log(identifier)
+	except:
+		pass
+
+	if not identifier:
+		identifier = String.UUID()
+
+	return Hash.SHA1(identifier + "SUBZEROOOOOOOOOO")
 
 ####################################################################################################
 # Main menu
@@ -75,6 +136,7 @@ def AdvancedMenu(header="AdvancedMenu", message="Hello"):
 # Reset Plex Token
 ####################################################################################################
 def ResetPlexToken():
+	ga_track('event', 'Manual', 'Plugin', 'ResetPlexToken')
 	if Dict["token"]:
 		Dict["token"] = ""
 		if Dict["token"]:
@@ -91,6 +153,7 @@ def ResetPlexToken():
 # Advanced Menu
 ####################################################################################################
 def ResetHueToken():
+	ga_track('event', 'Manual', 'Plugin', 'ResetHueToken')
 	if Dict["HUE_USERNAME"]:
 		Dict["HUE_USERNAME"] = ""
 		if Dict["HUE_USERNAME"]:
@@ -136,7 +199,9 @@ def MyLights(header="My Lights"):
 ####################################################################################################
 def LightAction(light_id, on):
 	command =  {'on' : on}
-	try: Log(B.set_light(light_id, command))
+	ga_track('event', 'Manual', 'Lights', 'Trigger')
+	try:
+		Log(B.set_light(light_id, command))
 	except:
 		pass
 	return MyLights()
@@ -150,7 +215,7 @@ def ConnectBridge():
 # Callback to signin to Hue Bridge
 ####################################################################################################
 def ConnectBridgeCallback():
-	Log("Trying to connect")
+	ga_track('event', 'Manual', 'Plugin', 'ConnectBridge')
 	x = HueCheck().connect_to_bridge()
 	if x == "ErrorAuth":
 		message = "Error. Have you pushed the button on your bridge?"
@@ -176,7 +241,7 @@ def EnableHelloHue():
 ####################################################################################################
 def EnableHelloHueCallback():
 	Log("Trying to enable thread")
-	#threading.Thread(target=run_websocket_watcher,name='thread_websocket').start()
+	ga_track('event', 'Manual', 'Plugin', 'EnableHelloHue')
 	if not "thread_websocket" in str(threading.enumerate()):
 		ValidatePrefs()
 	Log(threading.enumerate())
@@ -192,7 +257,7 @@ def DisableHelloHue():
 # Callback to disable the Channel
 ####################################################################################################
 def DisableHelloHueCallback():
-	Log("Trying to disable thread")
+	ga_track('event', 'Manual', 'Plugin', 'DisableHelloHue')
 	if "thread_websocket" in str(threading.enumerate()):
 		ws.close()
 	Log(threading.enumerate())
@@ -203,7 +268,7 @@ def DisableHelloHueCallback():
 ####################################################################################################
 @route(PREFIX + '/ValidatePrefs')
 def ValidatePrefs():
-	global auth, plex, hue, converter, active_clients, firstrun
+	global auth, plex, hue, converter, active_clients, firstrun, plextv_clients
 	Log('Validating Prefs')
 	auth = HueCheck().check_username()
 	if auth is False:
@@ -212,10 +277,12 @@ def ValidatePrefs():
 		Log("Hue username is registered... Starting!")
 	converter = Converter()
 	hue = Hue()
+	plex = Plex()
+	plextv_clients = plex.get_plextv_clients()
+	Log(plextv_clients)
 	CompileRooms()
 	hue.get_hue_light_groups()
 	InitiateCurrentStatus()
-	plex = Plex()
 	active_clients = []
 	Log("Classes initiated")
 	if "thread_websocket" in str(threading.enumerate()):
@@ -583,6 +650,18 @@ class Plex:
 		e = ElementTree.fromstring(r.text.encode('utf-8'))
 		return e
 
+	def get_plextv_clients(self):
+		plexauth = {'user[login]': Prefs['PLEX_USERNAME'], 'user[password]': Prefs['PLEX_PASSWORD']}
+		r = requests.get('https://plex.tv/devices.json?X-Plex-Token=' + ACCESS_TOKEN, params=plexauth, headers=HEADERS)
+		e = json.loads(r.text)
+		try:
+			Log("success getting client from plex.tv")
+			return e
+		except (ValueError, KeyError, TypeError):
+			Log("error getting client from plex.tv")
+			return "error"
+
+
 ####################################################################################################
 # Compile rooms in list/dictionary on plugin start or pref change
 ####################################################################################################
@@ -651,18 +730,24 @@ def CompileRooms():
 			room['transition_paused'] = Prefs['HUE_TRANSITION_PAUSED_' + str(j)]
 			room['transition_resumed'] = Prefs['HUE_TRANSITION_RESUMED_' + str(j)]
 			room['transition_stopped'] = Prefs['HUE_TRANSITION_STOPPED_' + str(j)]
-			room['transition_on'] = Prefs['PLEX_TRANSITION_ON_' + str(j)]
-			room['transition_off'] = Prefs['PLEX_TRANSITION_OFF_' + str(j)]
+			#room['transition_on'] = Prefs['PLEX_TRANSITION_ON_' + str(j)]
+			#room['transition_off'] = Prefs['PLEX_TRANSITION_OFF_' + str(j)]
 			room['dim'] = Prefs['HUE_DIM_' + str(j)]
 			room['randomize'] = Prefs['HUE_RANDOMIZE_' + str(j)]
 			room['dark'] = Prefs['HUE_DARK_' + str(j)]
 			room['min_duration'] = Prefs['PLEX_DURATION_' + str(j)]
 			room['only_on'] = Prefs['HUE_ONLY_ON_' + str(j)]
-			room['turned_on'] = Prefs['PLEX_ON_' + str(j)]
-			room['turned_off'] = Prefs['PLEX_OFF_' + str(j)]
+			#room['turned_on'] = Prefs['PLEX_ON_' + str(j)]
+			#room['turned_off'] = Prefs['PLEX_OFF_' + str(j)]
 			room['room'] = j
+			room['hambisync_on'] = Prefs['HAM_ON_' + str(j)]
+			room['hambisync_off'] = Prefs['HAM_OFF_' + str(j)]
 			rooms.append(room)
 			Log("Adding room %s to rooms .." %j)
+			for i in plextv_clients:
+				if room['client'] == i['name']:
+					Log("Client exists in plex.tv")
+
 		else:
 			Log("skipping room %s." %j)
 		j += 1
@@ -925,10 +1010,30 @@ def run_websocket_watcher():
 
 def on_message(ws, message):
 	json_object = json.loads(message)
-	#Log(json_object)
-	if json_object['type'] == 'playing':
-		plex_status = plex.get_plex_status()
-		is_plex_playing(plex_status)
+	Log("WS: got new ws notif")
+	Log(json_object)
+	try:
+		if json_object['type'] == 'playing':
+			Log("WS: notification type is playing, passing to is_plex_playing")
+			plex_status = plex.get_plex_status()
+			Log("WS: Current plex status ...")
+			for item in plex_status.findall('Video'):
+				for player in item.iter('Player'):
+					Log(player.attrib)
+			is_plex_playing(plex_status)
+	except:
+		pass
+	try:
+		if json_object['NotificationContainer']['type'] == 'playing':
+			Log("WS: notification type is playing, passing to is_plex_playing")
+			plex_status = plex.get_plex_status()
+			Log("WS: Current plex status ...")
+			for item in plex_status.findall('Video'):
+				for player in item.iter('Player'):
+					Log(player.attrib)
+			is_plex_playing(plex_status)
+	except:
+		pass
 
 def on_close(ws):
 	Log("### closed ###")
@@ -1040,6 +1145,8 @@ def is_plex_playing(plex_status):
 							plex_is_playing(client_name=client_name, room=room, user=item.find('User').get('title'), gptitle=item.get('grandparentTitle'), title=item.get('title'), state=item.find('Player').get('state'), item=item, transition_type="transition_paused")
 							somethingwasdone = True
 						CURRENT_MEDIA[client_name + str(room)] = item.get('key')
+			else:
+				Log("client is not configured in channel settings, not doing anything.")
 	
 	if somethingwasdone is True:
 		return False
@@ -1053,6 +1160,7 @@ def is_plex_playing(plex_status):
 				Log(time.strftime("%I:%M:%S") + " - Playback stopped on %s in room %s - Waiting for new playback" % (client_name, room));
 				transitiontime = get_transition_time(ReturnFromClient(client_name, "transition_stopped", room))
 				if isitdark(client_name, room) is True and compare_duration(duration=DURATIONS[client_name_room], pref=ReturnFromClient(client_name, "min_duration", room)) is True:
+					triggerAmbisync("stopped", client_name, room)
 					choose_action("stopped", client_name, room, transitiontime)
 					DURATIONS[client_name_room] = ''
 
@@ -1065,13 +1173,41 @@ def plex_is_playing(client_name, room, user, gptitle, title, state, item, transi
 	CURRENT_STATUS[client_name + str(room)] = state
 	Log(time.strftime("%I:%M:%S") + " - %s %s %s - %s on %s in room %s." % (user, CURRENT_STATUS[client_name + str(room)], gptitle, title, client_name, room))
 	if isitdark(client_name, room) is True and compare_duration(duration=get_playing_item_duration(item, client_name, room), pref=ReturnFromClient(client_name, "min_duration", room)) is True:
+		triggerAmbisync("started", client_name, room)
 		choose_action(CURRENT_STATUS[client_name + str(room)], client_name, room, transitiontime)
+
+
+####################################################################################################
+# Choose action based on playback status and preferences
+####################################################################################################
+
+def triggerAmbisync(state, client_name, room):
+	if state == "stopped" and ReturnFromClient(client_name, "hambisync_off", room) is True:
+		Log("Stopping Hambisync")
+		try:
+			r = requests.get('http://' + Prefs['HAMBISYNC_IP'] + '/stop')
+			Log("Stopping Hambisync successful")
+		except requests.exceptions.RequestException as e:
+			Log("Stopping Hambisync error: "+str(e))
+			return False
+		pass
+	if state == "started" and ReturnFromClient(client_name, "hambisync_on", room) is True:
+		Log("Starting Hambisync")
+		try:
+			r = requests.get('http://' + Prefs['HAMBISYNC_IP'] + '/start')
+			Log("Starting Hambisync successful")
+		except requests.exceptions.RequestException as e:
+			Log("Starting Hambisync error: "+str(e))
+			return False
+		pass
 
 ####################################################################################################
 # Choose action based on playback status and preferences
 ####################################################################################################
 
 def choose_action(state, client_name, room, transitiontime):
+	ga_track('event', 'Automatic', 'PlayerState', state)
+	ga_track('event', 'Automatic', 'Lights', ReturnFromClient(client_name, state, room))
 	Log("Selecting action with transitiontime %s"%transitiontime)
 	if ReturnFromClient(client_name, state, room) == "Turn Off":
 		turn_off_lights(client_name, room, transitiontime)
@@ -1098,7 +1234,7 @@ def choose_action(state, client_name, room, transitiontime):
 		set_light_preset(client_name, room, transitiontime, "4")
 		pass
 	elif ReturnFromClient(client_name, state, room) == "Preset 5":
-		set_light_preset(client_name, room, transitiontime, "5")
+		set_light_preset(client_nameame, room, transitiontime, "5")
 		pass
 	elif ReturnFromClient(client_name, state, room) == "Nothing":
 		Log("Doing nothing")
@@ -1173,32 +1309,31 @@ def dim_lights(client_name, room, transitiontime):
 def watch_clients():
 	global firstrun
 	firstrun = True
-	while True:
-		plex_status = plex.get_plex_clients()
-		now_active = []
-		for item in plex_status.findall('Server'):
-			now_active.append(item.get('name'))
-			if firstrun is True:
-				active_clients.append(item.get('name'))
-		#Log("now_active: %s"%now_active)
-		#Log("active_clients: %s"%active_clients)
-		#Log("firstrun: %s"%firstrun)
-		if firstrun is False:
-			for client in now_active:
-				if not client in active_clients:
-					Log(ReturnRoomFromClient(client))
-					Log("%s detected, doing something"%client)
-					for roooms in ReturnRoomFromClient(client):
-						choose_action("turned_on", client, roooms, get_transition_time(ReturnFromClient(client, "transition_on", roooms)))
-					active_clients.append(client)
-			for client in active_clients:
-				if not client in now_active:
-					Log(ReturnRoomFromClient(client))
-					Log("%s went away, doing something"%client)
-					for roooms in ReturnRoomFromClient(client):
-						choose_action("turned_off", client, roooms, get_transition_time(ReturnFromClient(client, "transition_off", roooms)))
-					active_clients.remove(client)
+	plex_status = plex.get_plex_clients()
+	now_active = []
+	for item in plex_status.findall('Server'):
+		now_active.append(item.get('name'))
 		if firstrun is True:
-			Log("Setting firstrun to False")
-			firstrun = False
-		sleep(1)
+			active_clients.append(item.get('name'))
+	#Log("now_active: %s"%now_active)
+	#Log("active_clients: %s"%active_clients)
+	#Log("firstrun: %s"%firstrun)
+	if firstrun is False:
+		for client in now_active:
+			if not client in active_clients:
+				Log(ReturnRoomFromClient(client))
+				Log("%s detected, doing something"%client)
+				for roooms in ReturnRoomFromClient(client):
+					choose_action("turned_on", client, roooms, get_transition_time(ReturnFromClient(client, "transition_on", roooms)))
+				active_clients.append(client)
+		for client in active_clients:
+			if not client in now_active:
+				Log(ReturnRoomFromClient(client))
+				Log("%s went away, doing something"%client)
+				for roooms in ReturnRoomFromClient(client):
+					choose_action("turned_off", client, roooms, get_transition_time(ReturnFromClient(client, "transition_off", roooms)))
+				active_clients.remove(client)
+	if firstrun is True:
+		Log("Setting firstrun to False")
+		firstrun = False
+		pass
