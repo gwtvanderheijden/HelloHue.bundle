@@ -37,7 +37,7 @@ def Start():
 	HTTP.CacheTime = 0
 	ObjectContainer.title1 = NAME
 	ObjectContainer.art = R(ART)
-	Log('Starting HelloHue 1.1.8.3 .. Hello World!')
+	Log('Starting HelloHue 1.1.8.4 .. Hello World!')
 
 	first_visit = False
 
