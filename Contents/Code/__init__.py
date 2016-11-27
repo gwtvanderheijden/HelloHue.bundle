@@ -34,7 +34,20 @@ PROFILE_ICON = 'hellohue.png'
 # Start function
 ####################################################################################################
 def Start():
+	HTTP.CacheTime = 0
+	ObjectContainer.title1 = NAME
+	ObjectContainer.art = R(ART)
 	Log('Starting HelloHue 1.1.8.3 .. Hello World!')
+
+	first_visit = False
+
+	if Dict["anon_id"] == "" or not Dict["anon_id"]:
+		Dict["anon_id"] = get_identifier()
+
+	if Dict["first_use"] == "" or not Dict["first_use"]:
+		Log("first visit")
+		Dict["first_use"] = datetime.utcnow()
+		first_visit = True
 
 	global tracker, visitor, session
 	anonymousConfig = Config()
@@ -42,25 +55,16 @@ def Start():
 	tracker = Tracker('UA-87999998-1', 'none', conf=anonymousConfig)
 	visitor = Visitor()
 	visitor.unique_id = struct.unpack("!I", binascii.unhexlify(Dict["anon_id"][32:]))[0]/2
-	visitor.first_visit_time = Dict["first_use"]
-	session = Session()
 	Log(visitor.unique_id)
-
-	if Dict["anon_id"] == "" or not Dict["anon_id"]:
-		Dict["anon_id"] = get_identifier()
-
-	if Dict["first_use"] == "" or not Dict["first_use"]:
-			Dict["first_use"] = datetime.utcnow()
-			ga_track('event', 'Users', 'New', '1')
-
+	session = Session()
+	visitor.first_visit_time = Dict["first_use"]
 	Log(Dict["first_use"])
+
+	if first_visit is True:
+		ga_track('event', 'Users', 'New', '1')
 
 	ga_track('event', 'General', 'Plugin', 'Start')
 	refresh_analytics()
-
-	HTTP.CacheTime = 0
-	ObjectContainer.title1 = NAME
-	ObjectContainer.art = R(ART)
 	ValidatePrefs()
 
 ####################################################################################################
@@ -73,7 +77,6 @@ def ga_track(eventtype, category, action, label):
 	try:
 		event = Event(category=category, action=action, label=label)
 		tracker.track_event(event, session, visitor)
-
 		path = u"/" + u"/".join([category, action, label])
 		page = Page(path.lower())
 		tracker.track_pageview(page, session, visitor)
