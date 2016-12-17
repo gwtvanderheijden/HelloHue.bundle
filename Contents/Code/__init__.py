@@ -647,9 +647,15 @@ class Plex:
 			return Dict["token"]
 
 	def get_plex_status(self):
-		r = requests.get('http://' + Prefs['PLEX_ADDRESS'] + '/status/sessions?X-Plex-Token=' + ACCESS_TOKEN, headers=HEADERS)
-		e = ElementTree.fromstring(r.text.encode('utf-8'))
-		return e
+		try:
+			r = requests.get('http://' + Prefs['PLEX_ADDRESS'] + '/status/sessions?X-Plex-Token=' + ACCESS_TOKEN, headers=HEADERS)
+			e = ElementTree.fromstring(r.text.encode('utf-8'))
+			Log("success getting plex status "+str(e))
+			return e
+		except requests.exceptions.RequestException as e:
+			Log("error getting plex status "+str(e))
+			return False
+		pass
 
 	def get_plex_clients(self):
 		r = requests.get('http://' + Prefs['PLEX_ADDRESS'] + '/clients?X-Plex-Token=' + ACCESS_TOKEN, headers=HEADERS)
